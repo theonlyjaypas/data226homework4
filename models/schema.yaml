@@ -1,0 +1,127 @@
+version: 2
+
+models:
+  
+  # TRANSFORM MODELS DOCUMENTATION
+  
+  - name: user_session_channel
+    description: Enriched session data with user info and channel attribution
+    columns:
+      - name: session_id
+        description: Unique session identifier
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: Foreign key to users table
+        tests:
+          - not_null
+      - name: channel
+        description: Marketing channel attribution
+        tests:
+          - accepted_values:
+              values: ['organic_search', 'social', 'direct', 'other', 'paid_search']
+      - name: start_time
+        description: Session start timestamp
+        tests:
+          - not_null
+      - name: end_time
+        description: Session end timestamp
+
+  - name: session_timestamp
+    description: Transformed timestamp fields with time dimensions
+    columns:
+      - name: session_id
+        description: Unique session identifier
+        tests:
+          - unique
+          - not_null
+      - name: session_date
+        description: Date of session
+        tests:
+          - not_null
+      - name: session_duration_minutes
+        description: Duration of session in minutes
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1440
+
+  
+  # ANALYTICS MODELS DOCUMENTATION
+  
+  - name: session_summary
+    description: Business-ready analytics table with session aggregations and dimensions
+    columns:
+      - name: session_id
+        description: Unique session identifier - primary key
+        tests:
+          - unique:
+              severity: error
+          - not_null:
+              severity: error
+      - name: user_id
+        description: Foreign key to users table
+        tests:
+          - not_null
+      - name: username
+        description: User display name
+      - name: email
+        description: User email address
+      - name: country
+        description: User country code
+      - name: device_type
+        description: Device used in session
+        tests:
+          - accepted_values:
+              values: ['mobile', 'tablet', 'desktop']
+      - name: channel
+        description: Marketing channel attribution
+        tests:
+          - accepted_values:
+              values: ['organic_search', 'social', 'direct', 'other', 'paid_search']
+      - name: session_date
+        description: Date of session
+        tests:
+          - not_null
+      - name: session_duration_minutes
+        description: Duration of session in minutes
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1440
+      - name: active_session_flag
+        description: Binary flag for sessions with duration > 0
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: dbt_created_at
+        description: Timestamp when record was created by dbt
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: Timestamp when record was last updated by dbt
+        tests:
+          - not_null
+
+  # SNAPSHOT DOCUMENTATION
+  
+  - name: snapshot_session_summary
+    description: Historical snapshot of session_summary with SCD Type 2
+    columns:
+      - name: session_id
+        description: Unique session identifier
+        tests:
+          - not_null
+      - name: dbt_scd_id
+        description: Surrogate key for each snapshot version
+        tests:
+          - unique
+          - not_null
+      - name: dbt_valid_from
+        description: When this version became active
+        tests:
+          - not_null
+      - name: dbt_valid_to
+        description: When this version ended (NULL if current)

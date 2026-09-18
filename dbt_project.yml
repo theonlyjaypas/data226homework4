@@ -1,0 +1,91 @@
+
+# Welcome to your dbt project!
+# Name your project! Project names should contain only lowercase characters
+# and underscores. A good package might look like: "my_moms_floral_business"
+
+name: 'my_dbt_project'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'snowflake'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+data-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+models:
+  my_dbt_project:
+    # Global defaults for all models
+    +materialized: view
+    +tags: ["dbt_project"]
+
+    # Staging models (raw data cleanup)
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ["staging"]
+
+    # Transform models (Business logic layer)
+    transform:
+      +materialized: table
+      +schema: transform
+      +tags: ["transform", "core"]
+      +docs:
+        node_color: "orange"
+
+    # Analytics models (Final analysis layer)
+    analytics:
+      +materialized: table
+      +schema: analytics
+      +tags: ["analytics", "core"]
+      +docs:
+        node_color: "blue"
+
+# Configuring seeds
+# Full documentation: https://docs.getdbt.com/docs/seed
+
+seeds:
+  my_dbt_project:
+    +schema: seeds
+    +tags: ["seeds"]
+
+# Configuring snapshots
+# Full documentation: https://docs.getdbt.com/docs/snapshots
+
+snapshots:
+  my_dbt_project:
+    +schema: snapshots
+    +tags: ["snapshots"]
+
+# Configuring tests
+# Full documentation: https://docs.getdbt.com/docs/testing
+
+tests:
+  my_dbt_project:
+    +tags: ["tests"]
+    +store_failures: true
+
+# Configurable print statements
+# Full documentation: https://docs.getdbt.com/reference/dbt-jinja-functions/print-statement
+
+# Variable defaults
+vars:
+  start_date: '2020-01-01'
+  end_date: '2025-12-31'
+
+# Require dbt-core version (optional - good practice)
+require-dbt-version: [">=1.0.0"]
